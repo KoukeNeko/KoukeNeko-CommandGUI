@@ -1,0 +1,123 @@
+# CommandGUI Plugin Configuration
+# 版本號碼
+version: 1.0
+
+# 插件設定
+settings:
+  # 插件的前綴，會顯示在所有插件訊息前面
+  prefix: "&8[&bCommandGUI&8]&r"
+
+# 權限設定
+permissions:
+  # 使用插件的權限
+  use: "commandgui.use"
+  # 以控制台身份執行指令的權限
+  console: "commandgui.console"
+  # 管理員權限
+  admin: "commandgui.admin"
+
+# 指令設定 (使用列表格式)
+commands:
+  - command: "mycmd"
+    aliases: ["mc", "mycmd1"]
+    description: "打開一個執行指令的GUI"
+    permission: "commandgui.example1"
+    enabled: true
+    gui:
+      title: "&9自定義指令執行器"
+      description: "&7請輸入您想要傳送的玩家名稱"
+      placeholder: "輸入玩家名稱..."
+    # 執行配置改為列表，可以設定多個執行操作
+    executions:
+      - executor: "PLAYER"
+        execute-command: "tp %input%"
+        require-confirmation: true
+        confirmation-message: "&e你確定要傳送到 &b%input% &e嗎？"
+        success-message: "&a成功傳送到 &b%input%&a！"
+      - executor: "CONSOLE"
+        execute-command: "broadcast %player% 已傳送到 %input%"
+        require-confirmation: false
+    # 取消執行時的指令設定
+    cancel-executions:
+      - executor: "PLAYER"
+        execute-command: "me 取消了傳送請求"
+      - executor: "CONSOLE"
+        execute-command: "playsound minecraft:entity.villager.no player %player%"
+
+    # 輸入驗證規則
+    validation:
+      min-length: 3
+      max-length: 16
+      input-regex: "^[a-zA-Z0-9_]{3,16}$"
+      invalid-format-message: "&c不正確的玩家名稱格式！"
+
+  - command: "broadcast"
+    aliases: ["bc", "announce"]
+    description: "廣播一條消息"
+    permission: "commandgui.broadcast"
+    enabled: true
+    gui:
+      title: "&9廣播系統"
+      description: "&7輸入您想要廣播的訊息"
+      placeholder: "輸入廣播內容..."
+    executions:
+      - executor: "CONSOLE"
+        execute-command: "broadcast [公告] %input%"
+        require-confirmation: true
+        confirmation-message: "&e你確定要廣播: &b%input% &e嗎？"
+        success-message: "&a已成功發送廣播！"
+      - executor: "CONSOLE"
+        execute-command: "tellraw @a {\"text\":\"[公告]\",\"color\":\"gold\",\"bold\":true,\"extra\":[{\"text\":\" %input%\",\"color\":\"white\",\"bold\":false}]}"
+        require-confirmation: false
+    cancel-executions:
+      - executor: "CONSOLE"
+        execute-command: "tellraw %player% {\"text\":\"廣播已取消\",\"color\":\"red\"}"
+      - executor: "PLAYER"
+        execute-command: "me 取消了廣播"
+    validation:
+      min-length: 5
+      max-length: 100
+      input-regex: ".*"
+      invalid-format-message: "&c訊息格式不正確！"
+
+  - command: "give-item"
+    aliases: ["gi", "giveitem"]
+    description: "給予物品"
+    permission: "commandgui.giveitem"
+    enabled: true
+    gui:
+      title: "&9物品給予系統"
+      description: "&7格式: <玩家名稱> <物品ID> [數量]"
+      placeholder: "Steve diamond_sword 1"
+    executions:
+      - executor: "CONSOLE"
+        execute-command: "give %input%"
+        require-confirmation: true
+        confirmation-message: "&e你確定要執行: &bgive %input% &e嗎？"
+        success-message: "&a物品已成功給予！"
+      - executor: "CONSOLE"
+        execute-command: "playsound minecraft:entity.experience_orb.pickup player %player%"
+        require-confirmation: false
+      - executor: "PLAYER"
+        execute-command: "say 我剛剛使用了給予物品的功能！"
+        require-confirmation: false
+    cancel-executions:
+      - executor: "CONSOLE"
+        execute-command: "tellraw %player% {\"text\":\"物品給予操作已取消\",\"color\":\"yellow\"}"
+      - executor: "CONSOLE"
+        execute-command: "playsound minecraft:block.note_block.bass player %player% ~ ~ ~ 1 0.5"
+    validation:
+      min-length: 5
+      max-length: 100
+      input-regex: "^[a-zA-Z0-9_]+ [a-zA-Z0-9_:]+ [0-9]*$"
+      invalid-format-message: "&c格式不正確！正確格式: <玩家名稱> <物品ID> [數量]"
+
+# 自定義訊息
+messages:
+  no-permission: "&c你沒有權限使用此指令！"
+  command-disabled: "&c此指令目前已被禁用！"
+  unknown-command: "&c未知指令！"
+  player-only: "&c此指令只能由玩家執行！"
+  console-only: "&c此指令只能由控制台執行！"
+  reload-success: "&a配置文件已成功重載！"
+  cancel-message: "&c操作已取消"

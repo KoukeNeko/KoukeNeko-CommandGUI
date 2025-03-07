@@ -21,12 +21,9 @@ commands:
     executions:
       - executor: "PLAYER"
         execute-command: "tp {input}"
-        require-confirmation: true
-        confirmation-message: "&e你確定要傳送到 &b{input} &e嗎？"
         success-message: "&a成功傳送到 &b{input}&a！"
       - executor: "CONSOLE"
         execute-command: "broadcast %player% 已傳送到 {input}"
-        require-confirmation: false
     cancel-executions:
       - executor: "PLAYER"
         execute-command: "me 取消了傳送請求"
@@ -50,12 +47,9 @@ commands:
     executions:
       - executor: "CONSOLE"
         execute-command: "broadcast [公告] {input}"
-        require-confirmation: true
-        confirmation-message: "&e你確定要廣播: &b{input} &e嗎？"
-        success-message: "&a已成功發送廣播！"
+        success-message: "&a已成功發送廣播：{input}"
       - executor: "CONSOLE"
         execute-command: "tellraw @a {\"text\":\"[公告]\",\"color\":\"gold\",\"bold\":true,\"extra\":[{\"text\":\" {input}\",\"color\":\"white\",\"bold\":false}]}"
-        require-confirmation: false
     cancel-executions:
       - executor: "CONSOLE"
         execute-command: "tellraw %player% {\"text\":\"廣播已取消\",\"color\":\"red\"}"
@@ -79,15 +73,11 @@ commands:
     executions:
       - executor: "CONSOLE"
         execute-command: "give {input}"
-        require-confirmation: true
-        confirmation-message: "&e你確定要執行: &bgive {input} &e嗎？"
         success-message: "&a物品已成功給予！"
       - executor: "CONSOLE"
         execute-command: "playsound minecraft:entity.experience_orb.pickup player %player%"
-        require-confirmation: false
       - executor: "PLAYER"
         execute-command: "say 我剛剛使用了給予物品的功能！"
-        require-confirmation: false
     cancel-executions:
       - executor: "CONSOLE"
         execute-command: "tellraw %player% {\"text\":\"物品給予操作已取消\",\"color\":\"yellow\"}"

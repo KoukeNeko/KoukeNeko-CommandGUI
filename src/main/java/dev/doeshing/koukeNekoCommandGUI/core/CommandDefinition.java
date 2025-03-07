@@ -5,36 +5,29 @@ import org.bukkit.configuration.ConfigurationSection;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.bukkit.Bukkit.getLogger;
-
 /**
- * 用於封裝 config.yml 中「commands」節點下的指令資料
+ * 用於封裝 config.yml 中 "commands" 節點下的指令資料
  */
 public class CommandDefinition {
 
-    private String command;        // 主指令
-    private List<String> aliases;  // 指令別名
-    private String description;    // 指令描述
-    private String permission;     // 權限
-    private boolean enabled;       // 是否啟用
+    private String command;             // 主指令
+    private List<String> aliases;       // 指令別名
+    private String description;         // 指令描述
+    private String permission;          // 權限
+    private boolean enabled;            // 是否啟用
 
-    private String guiTitle;       // AnvilGUI 的標題
-    private String guiDescription; // 顯示給玩家的提示描述
-    private String guiPlaceholder; // AnvilGUI 預設文字
+    private String guiTitle;            // AnvilGUI 的標題
+    private String guiDescription;      // 顯示給玩家的提示描述
+    private String guiPlaceholder;      // AnvilGUI 預設文字
 
-    private int minLength;         // 輸入最小長度
-    private int maxLength;         // 輸入最大長度
-    private String inputRegex;     // 輸入驗證用 Regex
-    private String invalidFormatMessage; // 驗證失敗時訊息
+    private int minLength;              // 輸入最小長度
+    private int maxLength;              // 輸入最大長度
+    private String inputRegex;          // 輸入驗證用 Regex
+    private String invalidFormatMessage;// 驗證失敗時訊息
 
     private List<ExecutionDefinition> executions;       // 執行動作列表
     private List<ExecutionDefinition> cancelExecutions; // 取消動作列表
 
-    /**
-     * 從 config.yml 的一個子節點載入指令資料
-     *
-     * @param section 指向該指令設定的 ConfigurationSection
-     */
     public CommandDefinition(ConfigurationSection section) {
         this.command = section.getString("command", "");
         this.aliases = section.getStringList("aliases");
@@ -59,8 +52,6 @@ public class CommandDefinition {
 
         this.executions = loadExecutions(section, "executions");
         this.cancelExecutions = loadExecutions(section, "cancel-executions");
-
-        getLogger().info("[CommandDefinition] Loading command=" + this.command);
     }
 
     private List<ExecutionDefinition> loadExecutions(ConfigurationSection parent, String path) {
@@ -71,7 +62,6 @@ public class CommandDefinition {
         List<?> execList = parent.getMapList(path);
         for (Object obj : execList) {
             if (obj instanceof java.util.Map) {
-                // 使用自定義 ExecutionDefinition 解析
                 list.add(new ExecutionDefinition((java.util.Map<?, ?>) obj));
             }
         }

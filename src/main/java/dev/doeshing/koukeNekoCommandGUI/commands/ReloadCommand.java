@@ -19,7 +19,7 @@ public class ReloadCommand implements CommandExecutor {
         plugin.reloadConfig();
 
         // 重新插件讀取後的操作
-        // plugin.reloadConfig();
+        plugin.reloadCommandsFromConfig();
 
         sender.sendMessage("§a設定文件已重新載入！");
         return true;

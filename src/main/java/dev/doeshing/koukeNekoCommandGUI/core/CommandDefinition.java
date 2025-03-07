@@ -4,6 +4,7 @@ import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用於封裝 config.yml 中 "commands" 節點下的指令資料
@@ -56,17 +57,23 @@ public class CommandDefinition {
 
     private List<ExecutionDefinition> loadExecutions(ConfigurationSection parent, String path) {
         List<ExecutionDefinition> list = new ArrayList<>();
-        if (!parent.isConfigurationSection(path)) {
-            return list;
-        }
+
+        // 直接拿 MapList，不要檢查 isConfigurationSection
         List<?> execList = parent.getMapList(path);
+        if (execList == null || execList.isEmpty()) {
+            return list; // 沒定義或是空清單
+        }
+
         for (Object obj : execList) {
-            if (obj instanceof java.util.Map) {
-                list.add(new ExecutionDefinition((java.util.Map<?, ?>) obj));
+            if (obj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> map = (Map<String, Object>) obj;
+                list.add(new ExecutionDefinition(map));
             }
         }
         return list;
     }
+
 
     // ===== Getter =====
 

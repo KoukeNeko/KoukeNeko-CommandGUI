@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
 
 /**
  * 動態指令類別，根據 CommandDefinition 建立並執行 AnvilGUI 流程 (單階段版)
+ *
+ * 目標：若玩家已成功執行指令，就不再呼叫取消動作。
  */
 public class DynamicCommand implements CommandExecutor {
 
@@ -25,6 +27,9 @@ public class DynamicCommand implements CommandExecutor {
     private final String commandDisabledMsg;
     private final String playerOnlyMsg;
     private final String cancelMsg;
+
+    // 用來標記「是否已經成功執行動作」
+    private boolean executed = false;
 
     public DynamicCommand(KoukeNekoCommandGUI plugin, CommandDefinition definition) {
         this.plugin = plugin;
@@ -40,7 +45,7 @@ public class DynamicCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        // 如果該指令在 config.yml 被標記為 disabled
+        // 若在 config.yml 被標記為 disabled
         if (!definition.isEnabled()) {
             sender.sendMessage(color(prefix + " " + commandDisabledMsg));
             return true;
@@ -75,24 +80,21 @@ public class DynamicCommand implements CommandExecutor {
 
         new AnvilGUI.Builder()
                 .plugin(plugin)
-                .title(color(definition.getGuiTitle()))      // 1.14+ 顯示
-                .text(color(definition.getGuiPlaceholder())) // AnvilGUI 的預設文字
+                .title(color(definition.getGuiTitle()))
+                .text(color(definition.getGuiPlaceholder()))
                 .onClose(stateSnapshot -> {
-                    // 若玩家關閉介面（包含按 X），視為「取消」
-                    runCancelExecutions(player);
+                    // 只有當尚未執行任何動作時，才呼叫取消
+                    if (!executed) {
+                        runCancelExecutions(player);
+                    }
                 })
                 .onClick((slot, snapshot) -> {
                     if (slot != AnvilGUI.Slot.OUTPUT) {
-                        // 點擊左/右槽 -> 不執行任何動作
                         return Collections.emptyList();
                     }
 
-                    // 取得玩家在 AnvilGUI 上方輸入的文字
                     String inputText = snapshot.getText();
-
-                    // 驗證輸入
                     if (!validateInput(player, inputText)) {
-                        // 驗證失敗，更新 AnvilGUI 的文字
                         return Collections.singletonList(
                                 AnvilGUI.ResponseAction.replaceInputText(
                                         color(definition.getInvalidFormatMessage())
@@ -100,22 +102,25 @@ public class DynamicCommand implements CommandExecutor {
                         );
                     }
 
-                    // 驗證通過 -> 直接執行動作
+                    // 驗證通過 -> 執行動作
                     runExecutions(player, inputText);
+
+                    // 設定已執行成功
+                    executed = true;
+
                     // 關閉 GUI
                     return Collections.singletonList(AnvilGUI.ResponseAction.close());
                 })
-                .preventClose() // 禁止 ESC 關閉，但仍可按 X
+                .preventClose()
                 .open(player);
     }
 
     /**
      * 執行主動作清單
-     * (已移除 require-confirmation，直接執行)
      */
     private void runExecutions(Player player, String inputText) {
-        for (var exec : definition.getExecutions()) {
-            // 執行指令
+        List<ExecutionDefinition> execList = definition.getExecutions();
+        for (ExecutionDefinition exec : execList) {
             String cmdToRun = PlaceholderUtil.replacePlaceholders(exec.getExecuteCommand(), player, inputText);
 
             if ("PLAYER".equalsIgnoreCase(exec.getExecutor())) {
@@ -124,7 +129,6 @@ public class DynamicCommand implements CommandExecutor {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmdToRun);
             }
 
-            // 若有成功訊息
             String success = exec.getSuccessMessage();
             if (success != null && !success.isEmpty()) {
                 success = PlaceholderUtil.replacePlaceholders(success, player, inputText);
@@ -137,9 +141,9 @@ public class DynamicCommand implements CommandExecutor {
      * 執行「取消」動作清單
      */
     private void runCancelExecutions(Player player) {
-        var list = definition.getCancelExecutions();
+        List<ExecutionDefinition> list = definition.getCancelExecutions();
         if (list != null && !list.isEmpty()) {
-            for (var exec : list) {
+            for (ExecutionDefinition exec : list) {
                 String cmdToRun = PlaceholderUtil.replacePlaceholders(exec.getExecuteCommand(), player, "");
                 if ("PLAYER".equalsIgnoreCase(exec.getExecutor())) {
                     player.performCommand(cmdToRun);

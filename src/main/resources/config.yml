@@ -23,7 +23,7 @@ commands:
         execute-command: "tp {input}"
         success-message: "&a成功傳送到 &b{input}&a！"
       - executor: "CONSOLE"
-        execute-command: "broadcast %player% 已傳送到 {input}"
+        execute-command: "say %player% 已傳送到 {input}"
     cancel-executions:
       - executor: "PLAYER"
         execute-command: "me 取消了傳送請求"
@@ -46,7 +46,7 @@ commands:
       placeholder: "輸入廣播內容..."
     executions:
       - executor: "CONSOLE"
-        execute-command: "broadcast [公告] {input}"
+        execute-command: "say [公告] {input}"
         success-message: "&a已成功發送廣播：{input}"
       - executor: "CONSOLE"
         execute-command: "tellraw @a {\"text\":\"[公告]\",\"color\":\"gold\",\"bold\":true,\"extra\":[{\"text\":\" {input}\",\"color\":\"white\",\"bold\":false}]}"

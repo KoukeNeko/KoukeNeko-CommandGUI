@@ -111,7 +111,7 @@ public class DynamicCommand implements CommandExecutor {
                     // 關閉 GUI
                     return Collections.singletonList(AnvilGUI.ResponseAction.close());
                 })
-                .preventClose()
+//                .preventClose()
                 .open(player);
     }
 
